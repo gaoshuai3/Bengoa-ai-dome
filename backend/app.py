@@ -4,8 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+DEEPSEEK_CHAT_URL = "https://api.deepseek.com/v1/chat/completions"
 CHORES_API_BASE = "http://your-chores-api.com/api"  # 请替换为你的实际接口地址
 
 app = Flask(__name__)
@@ -27,17 +27,17 @@ def get_members(token):
     resp = requests.get(f"{CHORES_API_BASE}/chores/memberInfoList", headers={"token": token})
     return resp.json().get("data", [])
 
-def call_openai(messages, temperature=0.3):
+def call_deepseek(messages, temperature=0.3):
     headers = {
-        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "gpt-3.5-turbo",
+        "model": "DeepSeek-V3.1",
         "messages": messages,
         "temperature": temperature
     }
-    resp = requests.post(OPENAI_CHAT_URL, headers=headers, json=payload)
+    resp = requests.post(DEEPSEEK_CHAT_URL, headers=headers, json=payload)
     resp.raise_for_status()
     return resp.json()["choices"][0]["message"]["content"]
 

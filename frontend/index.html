@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>家务创建AI助手</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        #chat { border:1px solid #ccc; padding:10px; width:400px; height:400px; overflow-y: auto; }
+        #inputArea { margin-top:10px; }
+        .user { color:blue; }
+        .bot { color:green; }
+    </style>
+</head>
+<body>
+    <h2>家务创建AI助手</h2>
+    <div id="chat"></div>
+    <div id="inputArea">
+        <input id="msg" type="text" style="width:300px;">
+        <button id="sendBtn">发送</button>
+    </div>
+    <script>
+        let session_id = null;
+        let token = prompt("请输入token（可模拟）:");
+
+        function appendMsg(who, txt) {
+            let chat = document.getElementById("chat");
+            let p = document.createElement("div");
+            p.className = who;
+            p.innerText = (who === "user" ? "我：" : "助手：") + txt;
+            chat.appendChild(p);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function startSession() {
+            let r = await fetch("/api/session", {method:"POST"});
+            let j = await r.json();
+            session_id = j.session_id;
+            appendMsg("bot", "欢迎使用家务创建助手，请输入家务名称：");
+        }
+
+        document.getElementById("sendBtn").onclick = async function() {
+            let msg = document.getElementById("msg").value.trim();
+            if (!msg) return;
+            appendMsg("user", msg);
+            document.getElementById("msg").value = "";
+            let r = await fetch("/api/ask", {
+                method:"POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({session_id, message: msg, token})
+            });
+            let j = await r.json();
+            appendMsg("bot", j.reply);
+        };
+
+        window.onload = startSession;
+    </script>
+</body>
+</html>
